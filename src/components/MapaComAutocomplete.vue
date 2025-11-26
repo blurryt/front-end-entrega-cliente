@@ -1,9 +1,7 @@
 <template>
   <div class="map-wrapper">
-    <!-- Mapa -->
     <div ref="mapRef" class="map-area"></div>
 
-    <!-- Agendamento -->
     <div class="schedule-options">
       <h3>Schedule it Anytime</h3>
       <div class="option-buttons">
@@ -12,14 +10,12 @@
       </div>
     </div>
 
-    <!-- Inputs -->
     <div class="input-box">
       <input ref="originInput" type="text" placeholder="Origem..." />
       <input ref="destinationInput" type="text" placeholder="Destino..." />
       <button @click="traceRoute">Agendar</button>
     </div>
 
-    <!-- Resultado -->
     <div v-if="routeInfo" class="route-info">
       <p><strong>Distância:</strong> {{ routeInfo.distance }}</p>
       <p><strong>Duração:</strong> {{ routeInfo.duration }}</p>
@@ -30,14 +26,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { loadGoogleMaps } from '../composables/useGoogleMaps'
+import { loadGoogleMaps } from '@/composables/useGoogleMaps.js'
 
-const route = useRoute()
+const route = useRoute();
 const origem = route.query.origem
 const destino = route.query.destino
 const modo = route.query.modo
-const google = await loadGoogleMaps(['places'])
-
 
 const mapRef = ref(null)
 const originInput = ref(null)

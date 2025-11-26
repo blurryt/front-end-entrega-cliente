@@ -45,13 +45,14 @@ const router = useRouter()
 const originInput = ref(null)
 const destinationInput = ref(null)
 const pickupTime = ref('later')
-const google = await loadGoogleMaps(['places'])
+// const google = await loadGoogleMaps(['places'])
 
 
 let autocompleteOrigin, autocompleteDestination
 
 onMounted(async () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  console.log("AQUI" + apiKey)
   const google = await loadGoogleMaps(apiKey, ['places'])
 
   autocompleteOrigin = new google.places.Autocomplete(originInput.value)

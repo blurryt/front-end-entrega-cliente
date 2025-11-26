@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SelecionarLocal from '../components/SelecionarLocal.vue'
-import MapaComAutocomplete from '../components/MapaComAutocomplete.vue'
+import MapaComAutocomplete from "@/components/MapaComAutocomplete.vue"
+
 
 const routes = [
-  {
-    path: '/',
-    name: 'SelecionarLocal',
-    component: SelecionarLocal,
-  },
+{
+   path: '/',
+   name: 'SelecionarLocal',
+  component: SelecionarLocal,
+ },
   {
     path: '/mapa',
     name: 'MapaComAutocomplete',
