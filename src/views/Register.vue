@@ -67,8 +67,8 @@ const goBack = () => {
 const onSubmit = async () => {
     try {
         const res = await API.post('/register', {
-            first_name: firstName.value,
-            last_name: lastName.value,
+            firstName: firstName.value,
+            lastName: lastName.value,
             email: email.value,
             password: password.value
         })

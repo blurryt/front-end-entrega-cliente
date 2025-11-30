@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SelecionarLocal from '../components/SelecionarLocal.vue'
+// Removi o SelecionarLocal e Home pois não estavam sendo usados
 import MapaComAutocomplete from "@/components/MapaComAutocomplete.vue"
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
-import Home from '../views/Home.vue'
 import Profile from '../views/Profile.vue'
 
 // Função para verificar se o usuário está autenticado
@@ -17,23 +16,17 @@ const isAuthenticated = () => {
 }
 
 const routes = [
-{
-   path: '/',
-   name: 'SelecionarLocal',
-  component: SelecionarLocal,
-  meta: { requiresAuth: true }
- },
+  // 1. ROTA RAIZ (Redirecionamento)
+  {
+    path: '/',
+    redirect: '/home' // Joga o usuário para a Home automaticamente
+  },
   {
     path: '/home',
     name: 'MapaComAutocomplete',
     component: MapaComAutocomplete,
     meta: { requiresAuth: true }
   },
-  // { 
-  //   path: '/',
-  //   name: 'Home', 
-  //   component: Home 
-  // }, 
   { 
     path: '/login',
     name: 'Login',
@@ -51,6 +44,11 @@ const routes = [
     name: 'Profile',
     component: Profile,
     meta: { requiresAuth: true }
+  },
+  // Opcional: Rota para capturar qualquer URL errada e mandar para a home ou login
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/home'
   }
 ]
 

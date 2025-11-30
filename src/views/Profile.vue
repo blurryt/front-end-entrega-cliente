@@ -1,56 +1,52 @@
 <template>
   <div class="profile-container">
     <div class="profile-card">
+      
       <button @click="goBack" class="back-button">
-        <svg width="128px" height="128px" viewBox="0 0 1024 1024" class="icon" version="1.1"
-          xmlns="http://www.w3.org/2000/svg" fill="#000000">
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-          <g id="SVGRepo_iconCarrier">
-            <path d="M768 903.232l-50.432 56.768L256 512l461.568-448 50.432 56.768L364.928 512z" fill="#000000"></path>
-          </g>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 19L8 12L15 5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
 
       <div class="profile-avatar">
-        <svg width="80" height="80" viewBox="-6 -6 32.00 32.00" version="1.1" xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-          <g id="SVGRepo_iconCarrier">
-            <g id="Page-1" stroke-width="0.0002" fill="none" fill-rule="evenodd">
-              <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -2159.000000)" fill="#ffffff">
-                <g id="icons" transform="translate(56.000000, 160.000000)">
-                  <path
-                    d="M100.562548,2016.99998 L87.4381713,2016.99998 C86.7317804,2016.99998 86.2101535,2016.30298 86.4765813,2015.66198 C87.7127655,2012.69798 90.6169306,2010.99998 93.9998492,2010.99998 C97.3837885,2010.99998 100.287954,2012.69798 101.524138,2015.66198 C101.790566,2016.30298 101.268939,2016.99998 100.562548,2016.99998 M89.9166645,2004.99998 C89.9166645,2002.79398 91.7489936,2000.99998 93.9998492,2000.99998 C96.2517256,2000.99998 98.0830339,2002.79398 98.0830339,2004.99998 C98.0830339,2007.20598 96.2517256,2008.99998 93.9998492,2008.99998 C91.7489936,2008.99998 89.9166645,2007.20598 89.9166645,2004.99998 M103.955674,2016.63598 C103.213556,2013.27698 100.892265,2010.79798 97.837022,2009.67298 C99.4560048,2008.39598 100.400241,2006.33098 100.053171,2004.06998 C99.6509769,2001.44698 97.4235996,1999.34798 94.7348224,1999.04198 C91.0232075,1998.61898 87.8750721,2001.44898 87.8750721,2004.99998 C87.8750721,2006.88998 88.7692896,2008.57398 90.1636971,2009.67298 C87.1074334,2010.79798 84.7871636,2013.27698 84.044024,2016.63598 C83.7745338,2017.85698 84.7789973,2018.99998 86.0539717,2018.99998 L101.945727,2018.99998 C103.221722,2018.99998 104.226185,2017.85698 103.955674,2016.63598"
-                    id="profile_round-[#1342]"></path>
-                </g>
-              </g>
-            </g>
-          </g>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 21C20 19.6044 20 18.9067 19.8278 18.3389C19.44 17.0605 18.4395 16.06 17.1611 15.6722C16.5933 15.5 15.8956 15.5 14.5 15.5H9.5C8.10444 15.5 7.40665 15.5 6.83886 15.6722C5.56045 16.06 4.56004 17.0605 4.17224 18.3389C4 18.9067 4 19.6044 4 21M16.5 7.5C16.5 9.98528 14.4853 12 12 12C9.51472 12 7.5 9.98528 7.5 7.5C7.5 5.01472 9.51472 3 12 3C14.4853 3 16.5 5.01472 16.5 7.5Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
 
-      <h1 class="profile-title">Profile</h1>
+      <h1 class="profile-title">Meu Perfil</h1>
 
       <div class="profile-info">
         <div class="info-group">
-          <label>First Name</label>
-          <div class="info-value">{{ user.firstName || 'N/A' }}</div>
+          <label>Nome</label>
+          <div class="info-value">
+            {{ isLoading ? 'Carregando...' : (user.firstName || 'N/A') }}
+          </div>
         </div>
 
         <div class="info-group">
-          <label>Last Name</label>
-          <div class="info-value">{{ user.lastName || 'N/A' }}</div>
+          <label>Sobrenome</label>
+          <div class="info-value">
+            {{ isLoading ? 'Carregando...' : (user.lastName || 'N/A') }}
+          </div>
         </div>
 
         <div class="info-group">
           <label>Email</label>
-          <div class="info-value">{{ user.email || 'N/A' }}</div>
+          <div class="info-value">
+            {{ isLoading ? 'Carregando...' : (user.email || 'N/A') }}
+          </div>
+        </div>
+        
+        <div class="info-group">
+          <label>Saldo Atual</label>
+          <div class="info-value" style="color: green; font-weight: bold;">
+            R$ {{ isLoading ? '...' : (user.balance?.toFixed(2) || '0.00') }}
+          </div>
         </div>
       </div>
 
-      <button @click="handleLogout" class="logout-button">Logout</button>
+      <button @click="handleLogout" class="logout-button">Sair</button>
     </div>
   </div>
 </template>
@@ -58,62 +54,72 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import API, { logout } from '../services/api'
 
 const router = useRouter()
+const isLoading = ref(true)
 const user = ref({
   firstName: '',
   lastName: '',
   email: '',
-  createdAt: ''
+  balance: 0
 })
 
 const goBack = () => {
-  router.back()
+  router.push('/home') // Garante que volta para o mapa
 }
 
-const formatDate = (date) => {
-  if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
+// Carregar dados do usuário
 const loadUserData = async () => {
-  // Primeiro tenta carregar do localStorage
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    user.value = JSON.parse(storedUser)
-  }
+  const token = localStorage.getItem('authToken')
   
-  // Depois tenta atualizar do servidor
+  if (!token) {
+    router.push('/login')
+    return
+  }
+
   try {
-    const response = await API.get('/profile')
-    user.value = response.data
-    // Atualiza o localStorage com os dados mais recentes
-    localStorage.setItem('user', JSON.stringify(response.data))
-  } catch (error) {
-    console.error('=== ERRO AO CARREGAR PERFIL ===')
-    console.error('Status:', error.response?.status)
-    console.error('Mensagem:', error.response?.data)
-    console.error('Erro completo:', error)
-    // Se já tem dados do localStorage, continua usando eles
-    if (!storedUser) {
-      console.error('Nenhum dado de usuário disponível')
+    // Busca os dados atualizados do backend
+    const res = await fetch('http://localhost:3000/profile', {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${token}` 
+      }
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      user.value = data
+    } else {
+      // Se der erro (ex: token expirado), desloga
+      handleLogout() 
     }
+  } catch (error) {
+    console.error('Erro ao carregar perfil:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
+// Função de Logout
 const handleLogout = async () => {
+  const token = localStorage.getItem('authToken')
+
   try {
-    await logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Erro ao fazer logout:', error)
-    router.push('/login')
+    // Avisa o backend para invalidar o token (Blacklist)
+    await fetch('http://localhost:3000/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+  } catch (err) {
+    console.error("Erro ao comunicar logout", err)
   }
+
+  // Limpa tudo do navegador
+  localStorage.removeItem('authToken')
+  localStorage.removeItem('user') // Se tiver salvo algo
+  
+  // Redireciona
+  router.push('/login')
 }
 
 onMounted(() => {
@@ -147,24 +153,29 @@ onMounted(() => {
   left: 20px;
   background: none;
   border: none;
-  font-size: 28px;
-  color: #000000;
   cursor: pointer;
-  padding: 0;
+  padding: 5px;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
 }
 
 .back-button:hover {
-  opacity: 0.7;
+  background-color: #f0f0f0;
 }
 
 .profile-avatar {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   background-color: #000000;
   border-radius: 50%;
   margin: 0 auto 30px;
@@ -173,12 +184,17 @@ onMounted(() => {
   align-items: center;
 }
 
+.profile-avatar svg {
+    width: 50px;
+    height: 50px;
+}
+
 .profile-title {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #000000;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .profile-info {
@@ -186,41 +202,45 @@ onMounted(() => {
 }
 
 .info-group {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .info-group label {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #666666;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
   margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-value {
   width: 100%;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
+  padding: 12px 15px;
+  border: 2px solid #f0f0f0;
   border-radius: 12px;
-  font-size: 15px;
-  color: #000000;
-  background-color: #f8f8f8;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  background-color: #fff;
+  box-sizing: border-box; /* Importante para não quebrar layout */
 }
 
 .logout-button {
   width: 100%;
   padding: 16px;
-  background-color: #d32f2f;
+  background-color: #ff3b30;
   color: #ffffff;
   border: none;
   border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
 .logout-button:hover {
-  background-color: #b71c1c;
+  background-color: #d32f2f;
 }
 </style>
