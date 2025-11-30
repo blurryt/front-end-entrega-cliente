@@ -3,7 +3,7 @@
     <Header />
     <div ref="mapRef" class="map-area"></div>
 
-    <div v-if="!isWaiting && !tripAccepted" class="input-overlay">
+    <div v-show="!isWaiting && !tripActive" class="input-overlay">
       <div class="input-group">
         <i class="icon">📍</i>
         <input ref="originInput" type="text" placeholder="Local de partida..." />
@@ -15,7 +15,7 @@
       <button @click="traceRoute">Calcular Rota</button>
     </div>
 
-    <div v-if="routeInfo && !isWaiting && !tripAccepted" class="route-info">
+    <div v-if="routeInfo && !isWaiting && !tripActive" class="route-info">
       <p><strong>Distância:</strong> {{ routeInfo.distance }}</p>
       <p><strong>Duração:</strong> {{ routeInfo.duration }}</p>
       <p class="valor-destaque"><strong>Valor:</strong> R$ {{ routeInfo.valor }}</p>
@@ -30,10 +30,11 @@
       <button @click="cancelTrip" class="btn-cancel">Cancelar Pedido</button>
     </div>
 
-    <div v-if="tripAccepted" class="accepted-overlay">
-      <h3>🚗 Motorista a caminho!</h3>
-      <p>Seu motorista aceitou a corrida.</p>
-      <button @click="resetApp">Nova Corrida</button>
+    <div v-if="tripActive" class="accepted-overlay">
+      <h3>🚘 Em viagem...</h3>
+      <div class="pulsing-circle"></div>
+      <p>Você está a caminho do seu destino.</p>
+      <p style="font-size: 0.9em; color: #666;">Aguarde o motorista finalizar a corrida.</p>
     </div>
 
   </div>
@@ -44,6 +45,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { loadGoogleMaps } from '../composables/useGoogleMaps'
 import Header from './Header.vue'
 
+// Variáveis de Mapa e Rota
 const originInput = ref(null)
 const destinationInput = ref(null)
 const mapRef = ref(null)
@@ -51,12 +53,13 @@ const routeInfo = ref(null)
 const currentRouteId = ref(null)
 const currentTripId = ref(null)
 
-const isWaiting = ref(false)
-const tripAccepted = ref(false)
-const timeLeft = ref(300)
+// Estados da Aplicação
+const isWaiting = ref(false)      // True = Aguardando motorista aceitar
+const tripActive = ref(false)     // True = Motorista aceitou e corrida está rolando
+const timeLeft = ref(300)         // 5 minutos
+
 let pollingInterval = null
 let timerInterval = null
-
 let map, directionsService, directionsRenderer, autocompleteOrigin, autocompleteDestination
 
 onMounted(async () => {
@@ -87,7 +90,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  stopPolling()
+  stopAll()
 })
 
 function formatTime(seconds) {
@@ -96,55 +99,46 @@ function formatTime(seconds) {
   return `${m}:${s < 10 ? '0' : ''}${s}`
 }
 
-// --- FUNÇÃO DE CANCELAMENTO UNIFICADA ---
-// O parametro 'param' pode ser um Evento (clique do botão) ou uma String (mensagem de timeout)
-async function cancelTrip(param) {
+// --- FUNÇÃO DE LIMPEZA TOTAL ---
+function stopAll() {
+  if (timerInterval) clearInterval(timerInterval)
+  if (pollingInterval) clearInterval(pollingInterval)
+}
+
+// Função auxiliar para atualizar o saldo visualmente
+async function refreshUserBalance() {
   const token = localStorage.getItem('authToken')
-  
-  // Define a mensagem: se 'param' for texto, usa ele. Se for evento (clique), usa padrão.
-  const message = typeof param === 'string' ? param : 'Viagem cancelada com sucesso.'
-
-  // 1. Para o cronômetro imediatamente
-  stopPolling()
-
-  // 2. Se não tem ID de viagem (cancelamento local), só reseta
-  if (!currentTripId.value) {
-      isWaiting.value = false
-      resetApp()
-      return
-  }
-
   try {
-    // 3. Chama o backend para cancelar no banco
-    console.log(currentTripId.value)
-    const res = await fetch(`http://localhost:3000/viagens/${currentTripId.value}`, {
-        method: 'PATCH',
-        headers: { 
-            "Content-Type":"application/json" 
-        },
-        body: JSON.stringify({
-          status: 'canceled'
-        })
+    // Busca os dados fresquinhos do banco
+    const res = await fetch('http://localhost:3000/profile', {
+      headers: { 'Authorization': `Bearer ${token}` }
     })
-
-    const data = await res.json()
-
+    
     if (res.ok) {
-        alert(message)
-    } else {
-        // Se a viagem já foi aceita ou concluída, o backend vai avisar aqui
-        alert('Aviso: ' + (data.erro || data.mensagem))
+      const userUpdated = await res.json()
+      // Atualiza o localStorage
+      localStorage.setItem('user', JSON.stringify(userUpdated))
+      // Grita para o Header: "Ei, o saldo mudou!"
+      window.dispatchEvent(new Event('auth-change'))
     }
-
   } catch (error) {
-    console.error('Erro ao cancelar', error)
-  } finally {
-    // 4. Limpa a tela independente do resultado
-    isWaiting.value = false
-    resetApp()
+    console.error("Erro ao atualizar saldo:", error)
   }
 }
 
+function resetApp() {
+    stopAll()
+    isWaiting.value = false
+    tripActive.value = false
+    routeInfo.value = null
+    currentRouteId.value = null
+    currentTripId.value = null
+    originInput.value.value = ''
+    destinationInput.value.value = ''
+    directionsRenderer.setDirections({routes: []})
+}
+
+// --- CONFIRMAR VIAGEM E INICIAR MONITORAMENTO ---
 async function confirmTrip() {
   const token = localStorage.getItem('authToken')
   
@@ -162,7 +156,8 @@ async function confirmTrip() {
     
     if (data.sucesso) {
       currentTripId.value = data.trip._id
-      startWaiting()
+      refreshUserBalance()
+      startMonitoring()
     } else {
       alert('Erro: ' + (data.erro || data.mensagem))
     }
@@ -172,57 +167,109 @@ async function confirmTrip() {
   }
 }
 
-function startWaiting() {
+// --- MONITORAMENTO (POLLING) ---
+function startMonitoring() {
+  stopAll()
+
   isWaiting.value = true
+  tripActive.value = false
   timeLeft.value = 300 
 
+  // 1. Cronômetro de 5 minutos (Só roda enquanto estiver ESPERANDO)
   timerInterval = setInterval(() => {
     timeLeft.value--
     if (timeLeft.value <= 0) {
-      // Aqui passamos uma string, então a função cancelTrip vai usar essa mensagem
       cancelTrip('Tempo limite excedido! Nenhum motorista encontrado.')
     }
   }, 1000)
 
-  pollingInterval = setInterval(checkTripStatus, 3000)
+  // 2. Polling Eterno (Roda enquanto a viagem existir)
+  pollingInterval = setInterval(checkTripStatus, 3000) // Checa a cada 3s
 }
 
 async function checkTripStatus() {
+  if (!currentTripId.value) return
+
   const token = localStorage.getItem('authToken')
+
   try {
-    const res = await fetch(`http://localhost:3000/viagens/${currentTripId.value}`, {
+    const url = `http://localhost:3000/viagens/${currentTripId.value}`
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
+
+    if (!res.ok) return // Ignora erros temporários
+
     const trip = await res.json()
 
+    // 1. MOTORISTA ACEITOU (Corrida em andamento)
     if (trip.status === 'active' || trip.status === 'accepted') {
-      stopPolling()
+      // Paramos apenas o cronômetro de 5 min (pois já achou motorista)
+      if (timerInterval) clearInterval(timerInterval)
+      
+      // Mudamos a tela para "Em Viagem"
       isWaiting.value = false
-      tripAccepted.value = true
-    }
+      tripActive.value = true
+      
+      // NOTA: NÃO paramos o pollingInterval! Continuamos checando.
+    } 
     
-    if (trip.status === 'canceled') {
-        cancelTrip('Viagem cancelada.')
+    // 2. CORRIDA FINALIZADA (O motorista encerrou)
+    else if (trip.status === 'completed') {
+        stopAll() // Para o polling
+        tripActive.value = false // Tira a tela de "Em viagem"
+        
+        // Exibe mensagem final ou modal de avaliação
+        alert('Viagem finalizada! Chegamos ao destino.')
+        
+        resetApp() // Limpa tudo para nova corrida
+    }
+
+    // 3. CANCELADA
+    else if (trip.status === 'canceled') {
+        stopAll()
+        alert('A viagem foi cancelada.')
+        await refreshUserBalance()
+        resetApp()
     }
 
   } catch (error) {
-    console.error("Erro no polling", error)
+    console.error("Erro de conexão no polling:", error)
   }
 }
 
-function stopPolling() {
-  if (timerInterval) clearInterval(timerInterval)
-  if (pollingInterval) clearInterval(pollingInterval)
-}
+async function cancelTrip(param) {
+  const token = localStorage.getItem('authToken')
+  const message = typeof param === 'string' ? param : 'Viagem cancelada.'
 
-function resetApp() {
-    tripAccepted.value = false
-    routeInfo.value = null
-    currentRouteId.value = null
-    currentTripId.value = null
-    originInput.value = ''
-    destinationInput.value = ''
-    directionsRenderer.setDirections({routes: []})
+  stopAll()
+
+  if (!currentTripId.value) {
+      resetApp()
+      return
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/viagens/${currentTripId.value}/cancelar`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    
+    if (res.ok || res.status === 400) { 
+        alert(message)
+        
+        // --- ADICIONE ISTO AQUI ---
+        await refreshUserBalance() // Atualiza o saldo no header imediatamente
+        // --------------------------
+    } else {
+        const data = await res.json()
+        alert('Erro: ' + (data.erro || data.mensagem))
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    resetApp()
+  }
 }
 
 function traceRoute() {
