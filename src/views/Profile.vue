@@ -79,7 +79,7 @@ const loadUserData = async () => {
 
   try {
     // Busca os dados atualizados do backend
-    const res = await fetch('http://localhost:3000/profile', {
+    const res = await fetch('http://3.151.215.80/api/profile', {
       method: 'GET',
       headers: { 
         'Authorization': `Bearer ${token}` 
@@ -106,7 +106,7 @@ const handleLogout = async () => {
 
   try {
     // Avisa o backend para invalidar o token (Blacklist)
-    await fetch('http://localhost:3000/logout', {
+    await fetch('http://3.151.215.80/api/logout', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
     })
