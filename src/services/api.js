@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-    baseURL: 'http://3.151.215.80/api'
+    baseURL: 'https://iboxt.duckdns.org/api'
 })
 
 // Interceptor para adicionar token automaticamente em todas as requisições

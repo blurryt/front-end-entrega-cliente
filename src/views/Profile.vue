@@ -79,7 +79,7 @@ const loadUserData = async () => {
 
   try {
     // Busca os dados atualizados do backend
-    const res = await fetch('http://3.151.215.80/api/profile', {
+    const res = await fetch('https://iboxt.duckdns.org/api/profile', {
       method: 'GET',
       headers: { 
         'Authorization': `Bearer ${token}` 
@@ -106,7 +106,7 @@ const handleLogout = async () => {
 
   try {
     // Avisa o backend para invalidar o token (Blacklist)
-    await fetch('http://3.151.215.80/api/logout', {
+    await fetch('https://iboxt.duckdns.org/api/logout', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
     })

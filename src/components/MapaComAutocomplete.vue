@@ -110,7 +110,7 @@ async function refreshUserBalance() {
   const token = localStorage.getItem('authToken')
   try {
     // Busca os dados fresquinhos do banco
-    const res = await fetch('http://3.151.215.80/api/profile', {
+    const res = await fetch('https://iboxt.duckdns.org/api/profile', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     
@@ -146,7 +146,7 @@ async function confirmTrip() {
   if (!token) return alert('Sessão expirada.')
 
   try {
-    const res = await fetch('http://3.151.215.80/api/viagens', {
+    const res = await fetch('https://iboxt.duckdns.org/api/viagens', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ routeId: currentRouteId.value })
@@ -193,7 +193,7 @@ async function checkTripStatus() {
   const token = localStorage.getItem('authToken')
 
   try {
-    const url = `http://3.151.215.80/api/viagens/${currentTripId.value}`
+    const url = `https://iboxt.duckdns.org/api/viagens/${currentTripId.value}`
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -250,7 +250,7 @@ async function cancelTrip(param) {
   }
 
   try {
-    const res = await fetch(`http://3.151.215.80/api/viagens/${currentTripId.value}/cancelar`, {
+    const res = await fetch(`https://iboxt.duckdns.org/api/viagens/${currentTripId.value}/cancelar`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -292,7 +292,7 @@ function traceRoute() {
             valor: 'Calculando...'
         }
 
-        fetch('http://3.151.215.80/api/rota', {
+        fetch('https://iboxt.duckdns.org/api/rota', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({
